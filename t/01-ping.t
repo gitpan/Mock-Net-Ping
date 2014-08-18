@@ -12,16 +12,6 @@ subtest "Verify Net::Ping::new" => sub {
     $p = new_ok( 'Net::Ping' );
 };
 
-# Test with the real Net::Ping::Ping
-subtest "Verify Net::Ping::ping" => sub {
-    can_ok 'Net::Ping', 'ping';
-    my ( $ok, $elapsed, $host ) = $p->ping( '127.0.0.1' );
-    is( $ok, 1, '127.0.0.1 is pingable' );
-    like( $elapsed, qr/^\d+|\d+\.\d+$/, 'Elapsed time was returned' );
-    diag "elapsed is $elapsed";
-    is( $host, '127.0.0.1', '$host was returned as 127.0.0.1' );
-};
-
 diag( "Override Net::Ping::ping now");
 
 # Override Net::Ping::ping so that we don't slow down the rest of the tests...
@@ -90,10 +80,12 @@ subtest "Verify failures are detected" => sub {
 
 subtest "Verify elapsed time" => sub {
     $p->hires( 1 ); # enable hires
+    diag "hires is $Net::Ping::hires";
     my ( $ok, $elapsed, $host ) = $p->ping( 'localhost' );
     diag "elapsed is $elapsed";
     like( $elapsed * 1000, qr/^\d+\.\d+$/, 'Elapsed time is a float with hires enabled' );
-    $p->hires( 0 ); # disable hires regardless of current setting
+    $p->hires( 0 ); # disable hires
+    diag "hires is $Net::Ping::hires";
     ( $ok, $elapsed, $host ) = $p->ping( 'localhost' );
     diag "elapsed is $elapsed";
     like( $elapsed, qr/^\d+$/, 'Elapsed time is an integer with hires disabled' );
